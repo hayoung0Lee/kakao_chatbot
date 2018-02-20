@@ -5,5 +5,5 @@ from . import views
 
 urlpatterns = [
         #url(r'keyboard/',views.keyboard, name='meal_keyboard'),
-        url(r'message/(?P<result>[^\/]*)/$',views.message, name='meal_message'),
+        url(r'message/(?P<result>[^\/]*)/(?P<answer>[^\/]*)$',views.message, name='meal_message'),
     ]

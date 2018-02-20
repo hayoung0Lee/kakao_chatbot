@@ -5,9 +5,9 @@ from bs4 import BeautifulSoup
 import json
 import os
 import sys
-from konlpy.tag import Twitter
 import chardet
 import numpy as np
+from collections import OrderedDict
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -16,48 +16,45 @@ sys.setdefaultencoding('utf-8')
 output_data = ""
 
 #의도 구분을 위한 학습 data
-intent_list = {
-    "학식" : ["학식","알려"],
-    "날씨" : ["날씨","알려"],
-    "동아리" : ["동아리","추천"],
+intent_list = OrderedDict({
+    "식당" : {"식당":None,"알다":None},
+    "학식" : {"학식":None,"알다":None},
+    "동아리" : {"동아리":None,"추천":None},
     #"건물" : ["건물","알려"],
-}
+})
 
-def analizing(question):
-    twitter = Twitter()
-    #print "*************", chardet.detect(question)
-    malist = twitter.pos(question,norm=True,stem=True)
-    malist = np.char.encode(malist,'utf-8')
+story_slot_entity = OrderedDict({
+    "식당":{"장소":None, "날짜":None},
+    "학식":{"식당":None, "날짜":None, "시간":None},#시간: 조식, 중식, 석식
+    "동아리":{"분과":None, "소속":None}, #동아리 분과, 동아리소속(중앙동아리 소모임)
+})
 
-    
-    
+def analizing(malist):
     for i in range(malist.shape[0]):
         malist[i,0] = unicode(malist[i,0])
     
         
     #print "EEEEE", malist[0,0]
-    
     #intent_list에 있는 단어가 모두 포함되어있으면 그 인텐트로 분류한다
-    check_intent = []
+    check_intent = {}
     intent_code = 0
-    #intent_code: 0-학식 1-날씨 2-동아리 3-그외
-    
+    #intent_code: 0-학식 1-식당 2-동아리 3-그외
     intent_in = False
+    
+    #for문을 개선해야할 것 같음
     for intent in intent_list.values():
-        check_intent = []
-        print "intent check", intent
-        intent_in = False
-        for i in intent:
-            for j in range(malist.shape[0]):
-                if i == malist[j,0]:
-                    intent_in = True
-            check_intent.append(intent_in)
-            
-        if False not in check_intent:
+        #print "DDDDDDDDDDDD", intent
+        for tag in intent.keys():
+            if tag in malist[:,0]:
+                intent[tag] = True
+            else:
+                intent[tag] = False
+           
+        if False not in intent.values():
             return intent_code
         else:
             intent_code += 1
-
-    print intent_code
+        
+    
     return intent_code
         
