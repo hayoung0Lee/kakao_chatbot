@@ -6,7 +6,6 @@ import json
 import mealparser
 import numpy as np
 from ast import literal_eval
-from emoji import Emoji
 
 '''
 def keyboard(request):
